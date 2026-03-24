@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -7,78 +6,82 @@ import pytz
 # --- CONFIGURATION ---
 st.set_page_config(page_title="Expert VPH 2026", layout="wide", page_icon="🦽")
 
-# --- CHARGEMENT ---
+# --- CHARGEMENT DES DONNÉES ---
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1CQv9DlVzslPhlKzY-6b6XFSLDAdm_ARS1MFXKfwgjGM/export?format=csv"
 
-@st.cache_data(ttl=5)
+@st.cache_data(ttl=5) # Mise à jour toutes les 5 secondes pour tes tests
 def load_data():
     try:
         df = pd.read_csv(SHEET_URL)
-        # Nettoyage automatique des noms de colonnes (enlève espaces et met en majuscules)
-        df.columns = df.columns.str.strip().str.upper()
+        
+        # --- NETTOYAGE CRITIQUE DES COLONNES ---
+        # On enlève les espaces et les "_" et on met en MAJUSCULES
+        # Ainsi "fiche_technique" ou "FICHE TECHNIQUE" deviennent "FICHETECHNIQUE"
+        raw_cols = df.columns.tolist()
+        df.columns = [str(c).strip().upper().replace(' ', '').replace('_', '') for c in df.columns]
+        
+        # Suppression des lignes vides
         df = df.dropna(how='all')
         df = df.fillna("")
         
-        paris_tz = pytz.timezone('Europe/Paris')
-        now = datetime.now(paris_tz).strftime("%H:%M")
-        return df, now
+        return df, raw_cols
     except Exception as e:
         st.error(f"Erreur de lecture : {e}")
-        return None, None
+        return None, []
 
-data, last_update = load_data()
+data, original_cols = load_data()
 
 # --- INTERFACE ---
 st.title("🦽 Assistant Réforme VPH 2026")
 
 if data is not None:
-    # Recherche
-    recherche = st.text_input("🔍 Rechercher un modèle :")
+    # Barre de recherche
+    recherche = st.text_input("🔍 Rechercher un modèle, une marque, etc.")
     
     df_f = data.copy()
     if recherche:
         mask = df_f.astype(str).apply(lambda x: x.str.contains(recherche, case=False)).any(axis=1)
         df_f = df_f[mask]
 
-    # Grille
+    # Affichage en grille (2 colonnes)
     cols = st.columns(2)
+    
     for idx, (_, row) in enumerate(df_f.iterrows()):
         with cols[idx % 2]:
-            # Utilisation de container pour séparer les fiches
+            # Carte du produit
             with st.container(border=True):
-                st.subheader(f"{row.get('FABRICANT', '---')} - {row.get('MODELE', '---')}")
+                st.subheader(f"{row.get('FABRICANT', '')} - {row.get('MODELE', '')}")
                 
-                c1, c2 = st.columns([1, 1.5])
+                col_gauche, col_droite = st.columns([1, 1.5])
                 
-                with c1:
-                    # Affichage Image
-                    img = str(row.get('LIEN PHOTO', '')).strip()
-                    if img.startswith('http'):
-                        st.image(img, use_container_width=True)
+                with col_gauche:
+                    # 1. LA PHOTO
+                    img_url = str(row.get('LIENPHOTO', '')).strip()
+                    if img_url.lower().startswith('http'):
+                        st.image(img_url, use_container_width=True)
                     else:
-                        st.info("📷 Pas d'image")
+                        st.info("📷 Image non dispo")
                     
-                    # --- LE BOUTON FICHE TECHNIQUE (VERIFICATION FORCEE) ---
-                    # On cherche la colonne "FICHE TECHNIQUE" ou "FICHETECHNIQUE"
-                    ft_link = str(row.get('FICHE TECHNIQUE', row.get('FICHETECHNIQUE', ''))).strip()
+                    # 2. LA FICHE TECHNIQUE (JUSTE EN DESSOUS DE LA PHOTO)
+                    # On cherche la colonne nettoyée "FICHETECHNIQUE"
+                    fiche_url = str(row.get('FICHETECHNIQUE', '')).strip()
                     
-                    if ft_link.startswith('http'):
-                        # BOUTON BLEU SI LIEN OK
-                        st.link_button("📄 VOIR FICHE TECHNIQUE", ft_link, use_container_width=True, type="primary")
+                    if fiche_url.lower().startswith('http'):
+                        st.link_button("📄 VOIR FICHE TECHNIQUE", fiche_url, use_container_width=True, type="primary")
                     else:
-                        # MESSAGE D'ERREUR ROUGE SI LIEN KO
-                        st.error("🚫 Fiche non renseignée")
+                        # Petit message si le lien est manquant dans ton Sheet
+                        st.caption("⚠️ Fiche technique non renseignée")
 
-                with c2:
-                    st.write(f"**Réf :** `{row.get('CODE_REF', 'N/A')}`")
-                    st.write(f"**LPPR :** `{row.get('CODE_LPPR', 'N/A')}`")
+                with col_droite:
+                    st.write(f"**Réf :** `{row.get('CODEREF', 'N/A')}`")
+                    st.write(f"**LPPR :** `{row.get('CODELPPR', 'N/A')}`")
                     st.write(f"**Châssis :** {row.get('CHASSIS', '-')}")
                     st.write(f"**Dossier :** {row.get('DOSSIER', '-')}")
-                    st.caption(f"Catégorie : {row.get('CATEGORIE', 'N/A')}")
+                    st.write(f"**Catégorie :** {row.get('CATEGORIE', '-')}")
                 
-                # Libellé
-                libelle = row.get('LIBELLE_PRESCRIPTION', '')
-                if libelle:
+                # Libellé en bas de carte
+                libelle = row.get('LIBELLEPRESCRIPTION', '')
+                if libelle and libelle != "Non spécifié":
                     with st.expander("📝 Libellé de prescription"):
                         st.write(libelle)
                         if st.button("Copier", key=f"cp_{idx}"):
