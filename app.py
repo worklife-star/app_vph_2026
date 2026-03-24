@@ -113,7 +113,7 @@ with tab2:
         st.subheader("📋 Fiches de préconisation")
         with st.container(border=True):
             st.write("**Fiche d'évaluation des besoins**")
-            st.link_button("📥 Télécharger PDF", "https://drive.google.com/file/d/1aEwrr1jAEMQE1pEiOUVs3ShwIXTKYDJ8/view?usp=sharing")
+            st.link_button("📥 Télécharger PDF", "https://drive.google.com/file/d/1aEwrr1jAEMQE1pEiOUVs3ShwIXTKYDJ8/view")
         
         with st.container(border=True):
             st.write("**Fiche de préconisation technique**")
