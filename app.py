@@ -49,29 +49,27 @@ for idx, (i, row) in enumerate(df.iterrows()):
                 
             with c2:
                 # --- INFOS TECHNIQUES ---
-                # On affiche la catégorie en premier
                 categorie = row.get('CATEGORIE', '-')
                 st.write(f"**Catégorie :** {categorie}")
 
-                # --- BOUTON FICHE TECHNIQUE (JUSTE SOUS CATÉGORIE) ---
+                # --- LIEN FICHE TECHNIQUE (TEXTE CLIQUABLE) ---
                 pdf_link = ""
-                # On cherche dans la colonne dédiée
                 if "FICHE TECHNIQUE" in df.columns:
                     pdf_link = str(row["FICHE TECHNIQUE"]).strip()
                 
-                # Si pas trouvé ou pas un lien direct, on fouille la ligne pour un lien http
                 if not pdf_link.lower().startswith("http"):
                     for val in row:
-                        if str(val).lower().startswith("http") and (".pdf" in str(val).lower() or "drive.google" in str(val).lower()):
+                        if str(val).lower().startswith("http") and ("drive.google" in str(val).lower() or ".pdf" in str(val).lower()):
                             pdf_link = str(val).strip()
                             break
                 
                 if pdf_link.lower().startswith("http"):
-                    st.link_button("📄 VOIR FICHE TECHNIQUE", pdf_link, use_container_width=True, type="primary")
+                    # On affiche un lien hypertexte classique
+                    st.markdown(f"📎 [**Ouvrir la Fiche Technique (PDF)**]({pdf_link})")
                 else:
-                    st.caption("⚠️ Fiche technique non disponible")
+                    st.caption("⚠️ Aucune fiche liée")
 
-                st.divider() # Petite ligne de séparation pour la clarté
+                st.divider()
 
                 st.write(f"**Référence :** `{row.get('CODE_REF', 'N/A')}`")
                 st.write(f"**LPPR :** `{row.get('CODE_LPPR', 'N/A')}`")
@@ -84,4 +82,4 @@ for idx, (i, row) in enumerate(df.iterrows()):
                         st.write(libelle)
 
 st.divider()
-st.caption("Astuce : Pour que le bouton fonctionne, remplissez la colonne 'FICHE TECHNIQUE' avec un lien HTTP dans votre Google Sheet.")
+st.caption("Note : Si le lien ne s'ouvre pas, vérifiez que le lien dans Google Sheet commence bien par 'https://'")
