@@ -117,7 +117,7 @@ with tab2:
         
         with st.container(border=True):
             st.write("**Fiche de préconisation technique**")
-            st.link_button("📥 Télécharger PDF", "https://https://drive.google.com/file/d/1aEwrr1jAEMQE1pEiOUVs3ShwIXTKYDJ8/view")
+            st.link_button("📥 Télécharger PDF", "https://drive.google.com/file/d/1aEwrr1jAEMQE1pEiOUVs3ShwIXTKYDJ8/view")
 
     with col_b:
         st.subheader("📑 Démarches & Guides")
