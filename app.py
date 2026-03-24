@@ -4,13 +4,11 @@ import pandas as pd
 # --- CONFIGURATION ---
 st.set_page_config(page_title="Expert VPH 2026", layout="wide")
 
-# --- LECTURE SANS CACHE (Pour voir les modifs instantanément) ---
+# --- LECTURE ---
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1CQv9DlVzslPhlKzY-6b6XFSLDAdm_ARS1MFXKfwgjGM/export?format=csv"
 
 try:
-    # On force pandas à relire le fichier à chaque actualisation
     df = pd.read_csv(SHEET_URL)
-    # Nettoyage des colonnes (MAJUSCULES et sans espaces)
     df.columns = [str(c).strip().upper() for c in df.columns]
 except Exception as e:
     st.error(f"Erreur de lecture du Google Sheet : {e}")
@@ -35,8 +33,7 @@ for idx, (i, row) in enumerate(df.iterrows()):
             c1, c2 = st.columns([1, 1.3])
             
             with c1:
-                # 1. GESTION DE LA PHOTO
-                # On cherche dans "LIEN PHOTO" ou toute colonne contenant "PHOTO"
+                # --- PHOTO ---
                 photo_link = ""
                 for col in df.columns:
                     if "PHOTO" in col:
@@ -50,27 +47,32 @@ for idx, (i, row) in enumerate(df.iterrows()):
                 else:
                     st.info("📷 Image non dispo")
                 
-                # 2. GESTION DE LA FICHE TECHNIQUE (SOUS LA PHOTO)
-                # On cherche le lien PDF que tu nous as donné
+            with c2:
+                # --- INFOS TECHNIQUES ---
+                # On affiche la catégorie en premier
+                categorie = row.get('CATEGORIE', '-')
+                st.write(f"**Catégorie :** {categorie}")
+
+                # --- BOUTON FICHE TECHNIQUE (JUSTE SOUS CATÉGORIE) ---
                 pdf_link = ""
-                # Stratégie : On cherche d'abord dans la colonne dédiée
+                # On cherche dans la colonne dédiée
                 if "FICHE TECHNIQUE" in df.columns:
                     pdf_link = str(row["FICHE TECHNIQUE"]).strip()
                 
-                # Si pas trouvé, on fouille TOUTE la ligne pour un lien .pdf
+                # Si pas trouvé ou pas un lien direct, on fouille la ligne pour un lien http
                 if not pdf_link.lower().startswith("http"):
                     for val in row:
-                        if str(val).lower().startswith("http") and ".pdf" in str(val).lower():
+                        if str(val).lower().startswith("http") and (".pdf" in str(val).lower() or "drive.google" in str(val).lower()):
                             pdf_link = str(val).strip()
                             break
                 
                 if pdf_link.lower().startswith("http"):
                     st.link_button("📄 VOIR FICHE TECHNIQUE", pdf_link, use_container_width=True, type="primary")
                 else:
-                    st.warning("⚠️ Lien PDF manquant")
+                    st.caption("⚠️ Fiche technique non disponible")
 
-            with c2:
-                # Infos techniques
+                st.divider() # Petite ligne de séparation pour la clarté
+
                 st.write(f"**Référence :** `{row.get('CODE_REF', 'N/A')}`")
                 st.write(f"**LPPR :** `{row.get('CODE_LPPR', 'N/A')}`")
                 st.write(f"**Châssis :** {row.get('CHASSIS', '-')}")
@@ -78,8 +80,8 @@ for idx, (i, row) in enumerate(df.iterrows()):
                 
                 libelle = row.get('LIBELLE_PRESCRIPTION', '')
                 if libelle and str(libelle).lower() != "non spécifié":
-                    with st.expander("📝 Libellé"):
+                    with st.expander("📝 Voir le libellé"):
                         st.write(libelle)
 
 st.divider()
-st.caption("Mode Debug : Si tu ne vois rien, vérifie que tes liens dans Google Sheets commencent bien par http")
+st.caption("Astuce : Pour que le bouton fonctionne, remplissez la colonne 'FICHE TECHNIQUE' avec un lien HTTP dans votre Google Sheet.")
