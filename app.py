@@ -117,17 +117,17 @@ with tab2:
         
         with st.container(border=True):
             st.write("**Fiche de préconisation technique**")
-            st.link_button("📥 Télécharger PDF", "https://VOTRE_LIEN_ICI_2.pdf")
+            st.link_button("📥 Télécharger PDF", "https://https://drive.google.com/file/d/1aEwrr1jAEMQE1pEiOUVs3ShwIXTKYDJ8/view")
 
     with col_b:
         st.subheader("📑 Démarches & Guides")
         with st.container(border=True):
             st.write("**Guide des démarches administratives**")
-            st.link_button("📥 Voir le guide", "https://VOTRE_LIEN_ICI_3.pdf")
+            st.link_button("📥 Voir le guide", "https://drive.google.com/file/d/1TXF4AiB_U9cwE1_56HoVrsCIE-RGZKLo/view?usp=drive_link")
             
         with st.container(border=True):
             st.write("**Tableau récapitulatif des classes**")
-            st.link_button("📥 Ouvrir le document", "https://VOTRE_LIEN_ICI_4.pdf")
+            st.link_button("📥 Ouvrir le document", "https://drive.google.com/file/d/1JZ97O8moGiemndSrMr-DNEUymjgeYi2V/view?usp=drive_link")
 
     st.markdown("---")
     st.warning("⚠️ **Rappel :** Assurez-vous d'utiliser les versions à jour (Réforme Mars 2026).")
