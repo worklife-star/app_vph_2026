@@ -4,53 +4,69 @@ from datetime import datetime
 import pytz
 
 # Configuration de la page
-st.set_page_config(page_title="Assistant Réforme VPH", layout="wide")
+st.set_page_config(page_title="Expert VPH 2026", layout="wide")
+
+# --- STYLE PERSONNALISÉ (CSS) ---
+st.markdown("""
+    <style>
+    /* Style pour l'encadré des filtres */
+    .filter-box {
+        background-color: #e1f5fe;
+        padding: 20px;
+        border-radius: 15px;
+        border-left: 8px solid #0288d1;
+        margin-bottom: 25px;
+    }
+    /* Rendre les titres de filtres plus gras */
+    .stMultiSelect label, .stTextInput label {
+        font-weight: bold !important;
+        color: #01579b !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # TITRE
-st.title("🦽 Assistant Sélection Fauteuils Roulants (Réforme 2026)")
+st.title("🦽 Assistant Sélection Fauteuils Roulants")
 
-# --- LOGIQUE DE MISE À JOUR ---
+# --- CHARGEMENT DES DONNÉES ---
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1CQv9DlVzslPhlKzY-6b6XFSLDAdm_ARS1MFXKfwgjGM/export?format=csv"
 
-@st.cache_data(ttl=60) # Mise à jour toutes les 60 secondes (1 minute)
+@st.cache_data(ttl=60)
 def load_data():
     try:
         df = pd.read_csv(SHEET_URL)
         df = df.replace(["Non spécifié", "null", "nan"], "")
-        # On capture l'heure de la mise à jour (Heure de Paris)
         paris_tz = pytz.timezone('Europe/Paris')
-        now = datetime.now(paris_tz).strftime("%d/%m/%Y à %H:%M")
+        now = datetime.now(paris_tz).strftime("%H:%M")
         return df, now
-    except Exception as e:
+    except:
         return None, None
 
 data, last_update = load_data()
 
-# Affichage de la date de mise à jour en petit sous le titre
 if last_update:
-    st.caption(f"Status : Données synchronisées le {last_update}")
+    st.caption(f"✅ Dernière synchro : {last_update}")
 
-st.markdown("---")
+# --- ZONE DE FILTRES BIEN VISIBLE ---
+st.markdown('<div class="filter-box">', unsafe_allow_html=True)
+st.subheader("🔍 RECHERCHE & FILTRES")
 
+col1, col2 = st.columns(2)
+with col1:
+    recherche = st.text_input("📝 Tapez un nom, un code ou une marque :", placeholder="Ex: Invacare...")
+    cat_list = sorted(data["CATEGORIE"].unique()) if data is not None and "CATEGORIE" in data.columns else []
+    cat_choice = st.multiselect("⚙️ Type de matériel :", cat_list)
+
+with col2:
+    ref_list = sorted([str(x) for x in data["CODE_REF"].unique() if x != ""]) if data is not None and "CODE_REF" in data.columns else []
+    ref_choice = st.multiselect("🔢 Référence Produit (CODE_REF) :", ref_list)
+    fab_list = sorted(data["FABRICANT"].unique()) if data is not None and "FABRICANT" in data.columns else []
+    fab_choice = st.multiselect("🏭 Fabricant :", fab_list)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# --- LOGIQUE DE FILTRAGE ---
 if data is not None:
-    # --- BARRE LATÉRALE (FILTRES) ---
-    st.sidebar.header("🔍 Filtres de sélection")
-    recherche = st.sidebar.text_input("Recherche rapide (Modèle, LPPR, Ref...)")
-    
-    # Filtre par Référence (CODE_REF)
-    ref_list = []
-    if "CODE_REF" in data.columns:
-        ref_list = sorted([str(x) for x in data["CODE_REF"].unique() if x != ""])
-    ref_choice = st.sidebar.multiselect("Référence Produit (CODE_REF)", ref_list)
-    
-    # Autres filtres
-    cat_list = sorted(data["CATEGORIE"].unique()) if "CATEGORIE" in data.columns else []
-    fab_list = sorted(data["FABRICANT"].unique()) if "FABRICANT" in data.columns else []
-    
-    cat_choice = st.sidebar.multiselect("Type de matériel", cat_list)
-    fab_choice = st.sidebar.multiselect("Fabricant", fab_list)
-
-    # --- LOGIQUE DE FILTRAGE ---
     df = data.copy()
     if recherche:
         df = df[df.apply(lambda row: recherche.lower() in row.astype(str).str.lower().values, axis=1)]
@@ -61,7 +77,8 @@ if data is not None:
     if fab_choice:
         df = df[df["FABRICANT"].isin(fab_choice)]
 
-    st.write(f"**{len(df)}** modèles trouvés.")
+    st.write(f"💡 **{len(df)}** modèles correspondent à votre sélection.")
+    st.markdown("---")
 
     # --- AFFICHAGE DES RÉSULTATS ---
     cols = st.columns(2)
@@ -75,10 +92,11 @@ if data is not None:
                     if str(img).startswith('http'):
                         st.image(img, use_container_width=True)
                     else:
-                        st.info("📷 Image")
+                        st.info("📷 Image à venir")
                 with c2:
                     st.write(f"**Réf :** `{row.get('CODE_REF', 'N/A')}`")
                     st.write(f"**LPPR :** `{row.get('CODE_LPPR', '')}`")
+                    st.write(f"**Prescripteur :** {row.get('PRESCRIPTEUR', '')}")
                 
                 with st.expander("📝 Libellé de prescription"):
                     libelle = row.get('LIBELLE_PRESCRIPTION', '')
@@ -88,6 +106,6 @@ if data is not None:
                             st.copy_to_clipboard(libelle)
                             st.toast("Copié !")
                     else:
-                        st.write("À compléter dans le Sheet.")
+                        st.write("Libellé en cours de rédaction.")
 else:
-    st.error("⚠️ Erreur de lecture du Google Sheet.")
+    st.error("Impossible de charger les données.")
