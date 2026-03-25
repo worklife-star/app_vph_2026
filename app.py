@@ -11,7 +11,7 @@ SHEET_URL = "https://docs.google.com/spreadsheets/d/1CQv9DlVzslPhlKzY-6b6XFSLDAd
 def load_data():
     try:
         df = pd.read_csv(SHEET_URL)
-        df.columns = [str(c).strip().upper() for c in df.columns]
+        df.columns = [str(c).strip().upper().replace(" ", "_") for c in df.columns]
         return df
     except Exception as e:
         st.error(f"Erreur de lecture : {e}")
@@ -34,8 +34,8 @@ if df_raw is not None:
 
     def get_options(col):
         """Retourne les valeurs uniques triées d'une colonne, avec 'Tous' en premier."""
-        if col in df.columns:
-            vals = sorted(df[col].dropna().astype(str).unique().tolist())
+        if col in df_raw.columns:
+            vals = sorted(df_raw[col].dropna().astype(str).unique().tolist())
             return ["Tous"] + vals
         return ["Tous"]
 
@@ -48,4 +48,36 @@ if df_raw is not None:
     with f4:
         filtre_ref = st.selectbox("🔖 Code Réf.", get_options("CODE_REF"))
     with f5:
-        filtre_sous_type = st.selectbox("📂 Sous-type", get_options("SOUS_TY
+        filtre_sous_type = st.selectbox("📂 Sous-type", get_options("SOUS_TYPE"))
+
+    # --- APPLICATION DE LA RECHERCHE ---
+    if recherche:
+        mask = df.astype(str).apply(lambda x: x.str.contains(recherche, case=False, na=False)).any(axis=1)
+        df = df[mask]
+
+    # --- APPLICATION DES FILTRES ---
+    filtres = {
+        "CATEGORIE": filtre_categorie,
+        "FABRICANT": filtre_fabricant,
+        "CHASSIS": filtre_chassis,
+        "CODE_REF": filtre_ref,
+        "SOUS_TYPE": filtre_sous_type,
+    }
+    for col, val in filtres.items():
+        if val != "Tous" and col in df.columns:
+            df = df[df[col].astype(str) == val]
+
+    # --- BOUTON RESET ---
+    if st.button("🔄 Réinitialiser les filtres"):
+        st.rerun()
+
+    st.write(f"💡 **{len(df)}** modèles trouvés.")
+    st.divider()
+
+    # --- GRILLE D'AFFICHAGE ---
+    if df.empty:
+        st.warning("Aucun résultat pour ces critères. Essayez de modifier les filtres.")
+    else:
+        cols = st.columns(2)
+        for idx, (i, row) in enumerate(df.iterrows()):
+            with cols[idx % 2]:
