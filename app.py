@@ -33,9 +33,8 @@ if df_raw is not None:
     f1, f2, f3, f4, f5 = st.columns(5)
 
     def get_options(col):
-        """Retourne les valeurs uniques triées d'une colonne, avec 'Tous' en premier."""
         if col in df_raw.columns:
-            vals = sorted(df_raw[col].dropna().astype(str).unique().tolist())
+            vals = sorted([v for v in df_raw[col].dropna().astype(str).unique() if v.lower() != "non spécifié"])
             return ["Tous"] + vals
         return ["Tous"]
 
@@ -90,8 +89,11 @@ if df_raw is not None:
                     c1, c2 = st.columns([1, 1.3])
 
                     with c1:
-                        photo = str(row.get("LIEN_PHOTO", row.get("LIEN PHOTO", ""))).strip()
+                        photo = str(row.get("LIEN_PHOTO", "")).strip()
                         if photo.lower().startswith("http"):
+                            if "drive.google.com/file/d/" in photo:
+                                file_id = photo.split("/d/")[1].split("/")[0]
+                                photo = f"https://drive.google.com/uc?export=view&id={file_id}"
                             st.image(photo, use_container_width=True)
                         else:
                             st.info("📷 Image non dispo")
@@ -99,8 +101,10 @@ if df_raw is not None:
                     with c2:
                         st.write(f"**Catégorie :** {row.get('CATEGORIE', '-')}")
                         st.write(f"**Sous-type :** {row.get('SOUS_TYPE', '-')}")
+                        st.write(f"**Classe :** {row.get('CLASSE', '-')}")
+                        st.write(f"**Prescripteur :** {row.get('PRESCRIPTEUR', '-')}")
 
-                        pdf_link = str(row.get("FICHE_TECHNIQUE", row.get("FICHE TECHNIQUE", ""))).strip()
+                        pdf_link = str(row.get("FICHE_TECHNIQUE", "")).strip()
                         if pdf_link.lower().startswith("http"):
                             st.link_button("📄 VOIR FICHE TECHNIQUE (PDF)", pdf_link)
                         else:
@@ -108,13 +112,25 @@ if df_raw is not None:
 
                         st.divider()
                         st.write(f"**Référence :** `{row.get('CODE_REF', 'N/A')}`")
-                        st.write(f"**LPPR :** `{row.get('CODE_LPPR', 'N/A')}`")
+                        st.write(f"**LPPR AM :** `{row.get('CODE_LPPR_ASSURANCE_MALADIE', 'N/A')}`")
+                        st.write(f"**LPPR Indiv. :** `{row.get('CODE_LPPR_INDIVIDUEL_FOURNISSEUR', 'N/A')}`")
                         st.write(f"**Châssis :** {row.get('CHASSIS', '-')}")
+                        st.write(f"**Usage :** {row.get('USAGE', '-')}")
+                        st.write(f"**Poids max :** {row.get('POIDS_MAX_UTILISATEUR', '-')}")
+
+                        tarif = str(row.get("TARIF_PRIS_EN_CHARGE", ""))
+                        if tarif and tarif.lower() not in ["nan", "non spécifié", ""]:
+                            st.write(f"**💶 Tarif pris en charge :** {tarif}")
 
                         libelle = str(row.get("LIBELLE_PRESCRIPTION", ""))
                         if libelle and libelle.lower() not in ["non spécifié", "nan", ""]:
-                            with st.expander("📝 Libellé"):
+                            with st.expander("📝 Libellé prescription"):
                                 st.write(libelle)
+
+                        descripteurs = str(row.get("DESCRIPEURS", ""))
+                        if descripteurs and descripteurs.lower() not in ["non spécifié", "nan", ""]:
+                            with st.expander("🏷️ Descripteurs"):
+                                st.write(descripteurs)
 
 else:
     st.error("Impossible de charger les données.")
