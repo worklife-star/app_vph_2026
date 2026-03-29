@@ -116,7 +116,11 @@ if df_raw is not None:
                         st.write(f"**LPPR Indiv. :** `{row.get('CODE_LPPR_INDIVIDUEL_FOURNISSEUR', 'N/A')}`")
                         st.write(f"**Châssis :** {row.get('CHASSIS', '-')}")
                         st.write(f"**Usage :** {row.get('USAGE', '-')}")
-                        st.write(f"**Poids max :** {row.get('POIDS_MAX_UTILISATEUR', '-')}")
+
+                        # ✅ Colonne renommée
+                        poids = str(row.get("POIDS_MAX_UTILISATEUR_/_POIDS_FAUTEUIL", ""))
+                        if poids and poids.lower() not in ["nan", "non spécifié", ""]:
+                            st.write(f"**Poids max utilisateur / Poids fauteuil :** {poids}")
 
                         tarif = str(row.get("TARIF_PRIS_EN_CHARGE", ""))
                         if tarif and tarif.lower() not in ["nan", "non spécifié", ""]:
