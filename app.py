@@ -19,7 +19,29 @@ def load_data():
 
 df_raw = load_data()
 
-# --- INTERFACE ---
+# --- BARRE LATÉRALE ---
+with st.sidebar:
+    st.image("https://www.sunrisemedical.fr/getmedia/ec8986a0-bdd9-414e-853a-dc3917a83efc/logo-sunrise-medical.svg", width=180)
+    st.markdown("## 📂 Documents utiles")
+    st.markdown("Téléchargez les documents officiels pour vos prescriptions.")
+    st.divider()
+
+    # Fiche de préconisation
+    fiche_preco_id = "1aEwrr1jAEMQE1pEiOUVs3ShwIXTKYDJ8"
+    fiche_preco_url = f"https://drive.google.com/uc?export=download&id={fiche_preco_id}"
+    st.link_button("📋 Fiche de préconisation", fiche_preco_url, use_container_width=True)
+
+    st.markdown("")
+
+    # Fiche d'évaluation des besoins
+    fiche_eval_id = "1OXc5N-rPpOAzI3r1F8Ov887mn_k75qoD"
+    fiche_eval_url = f"https://drive.google.com/uc?export=download&id={fiche_eval_id}"
+    st.link_button("📝 Évaluation des besoins", fiche_eval_url, use_container_width=True)
+
+    st.divider()
+    st.caption("🔄 Données mises à jour toutes les 60 secondes")
+
+# --- INTERFACE PRINCIPALE ---
 st.title("🦽 Assistant Réforme VPH 2026")
 
 if df_raw is not None:
@@ -102,13 +124,6 @@ if df_raw is not None:
                         st.write(f"**Catégorie :** {row.get('CATEGORIE', '-')}")
                         st.write(f"**Sous-type :** {row.get('SOUS_TYPE', '-')}")
                         st.write(f"**Classe :** {row.get('CLASSE', '-')}")
-                        st.write(f"**Prescripteur :** {row.get('PRESCRIPTEUR', '-')}")
-
-                        pdf_link = str(row.get("FICHE_TECHNIQUE", "")).strip()
-                        if pdf_link.lower().startswith("http"):
-                            st.link_button("📄 VOIR FICHE TECHNIQUE (PDF)", pdf_link)
-                        else:
-                            st.caption("⚠️ Aucune fiche PDF")
 
                         st.divider()
                         st.write(f"**Référence :** `{row.get('CODE_REF', 'N/A')}`")
@@ -117,19 +132,32 @@ if df_raw is not None:
                         st.write(f"**Châssis :** {row.get('CHASSIS', '-')}")
                         st.write(f"**Usage :** {row.get('USAGE', '-')}")
 
-                        # ✅ Colonne renommée
-                        poids = str(row.get("POIDS_MAX_UTILISATEUR_/_POIDS_FAUTEUIL", ""))
+                        # ✅ Colonne renommée POIDS
+                        poids = str(row.get("POIDS", ""))
                         if poids and poids.lower() not in ["nan", "non spécifié", ""]:
-                            st.write(f"**Poids max utilisateur / Poids fauteuil :** {poids}")
+                            st.write(f"**⚖️ Poids :** {poids}")
 
                         tarif = str(row.get("TARIF_PRIS_EN_CHARGE", ""))
                         if tarif and tarif.lower() not in ["nan", "non spécifié", ""]:
                             st.write(f"**💶 Tarif pris en charge :** {tarif}")
 
+                        st.divider()
+
+                        # ✅ Prescripteur + Libellé + Fiche technique regroupés
+                        prescripteur = str(row.get("PRESCRIPTEUR", ""))
+                        if prescripteur and prescripteur.lower() not in ["non spécifié", "nan", ""]:
+                            st.write(f"**👨‍⚕️ Prescripteur :** {prescripteur}")
+
                         libelle = str(row.get("LIBELLE_PRESCRIPTION", ""))
                         if libelle and libelle.lower() not in ["non spécifié", "nan", ""]:
                             with st.expander("📝 Libellé prescription"):
                                 st.write(libelle)
+
+                        pdf_link = str(row.get("FICHE_TECHNIQUE", "")).strip()
+                        if pdf_link.lower().startswith("http"):
+                            st.link_button("📄 VOIR FICHE TECHNIQUE (PDF)", pdf_link)
+                        else:
+                            st.caption("⚠️ Aucune fiche PDF")
 
                         descripteurs = str(row.get("DESCRIPEURS", ""))
                         if descripteurs and descripteurs.lower() not in ["non spécifié", "nan", ""]:
