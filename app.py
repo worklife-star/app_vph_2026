@@ -284,8 +284,8 @@ else:
         with cols[idx % 2]:
             with st.container(border=True):
 
-                fabricant = clean(row.get("FABRICANT","")) or ""
-                modele    = clean(row.get("MODELE",""))    or ""
+                fabricant = str(row.get("FABRICANT","")).strip()
+                modele    = str(row.get("MODELE","")).strip()
                 st.subheader(f"{fabricant} — {modele}")
 
                 img_col, info_col = st.columns([1, 1.4])
@@ -307,15 +307,22 @@ else:
                         v = clean(row.get(key,""))
                         if v: st.markdown(f"**{lbl} :** {v}")
 
-                    # ── Codes ──
+                    # ── Codes & Tarification — TOUJOURS affichés ──
                     st.divider()
                     st.markdown('<p class="section-title">Codes & Tarification</p>', unsafe_allow_html=True)
-                    ref = clean(row.get("CODE_REF",""))
-                    if ref: st.markdown(f"**Réf. :** `{ref}`")
-                    lppr_am = clean(row.get("CODE_LPPR_ASSURANCE_MALADIE",""))
-                    if lppr_am: st.markdown(f"**LPPR AM :** `{lppr_am}`")
-                    lppr_ind = clean(row.get("CODE_LPPR_INDIVIDUEL_FOURNISSEUR",""))
-                    if lppr_ind: st.markdown(f"**LPPR Indiv. :** `{lppr_ind}`")
+
+                    code_ref = str(row.get("CODE_REF","")).strip()
+                    if code_ref and code_ref.lower() not in ("nan",""):
+                        st.markdown(f"**CODE REF :** `{code_ref}`")
+
+                    lppr_am = str(row.get("CODE_LPPR_ASSURANCE_MALADIE","")).strip()
+                    if lppr_am and lppr_am.lower() not in ("nan",""):
+                        st.markdown(f"**CODE LPPR Assurance Maladie :** `{lppr_am}`")
+
+                    lppr_ind = str(row.get("CODE_LPPR_INDIVIDUEL_FOURNISSEUR","")).strip()
+                    if lppr_ind and lppr_ind.lower() not in ("nan",""):
+                        st.markdown(f"**CODE LPPR Individuel Fournisseur :** `{lppr_ind}`")
+
                     tarif = clean(row.get("TARIF_PRIS_EN_CHARGE",""))
                     if tarif:
                         st.markdown(f'<span class="tarif-badge">💶 {tarif}</span>', unsafe_allow_html=True)
@@ -329,23 +336,26 @@ else:
                         if chassis: st.markdown(f"**Châssis :** {chassis}")
                         if poids:   st.markdown(f"**⚖️ Poids :** {poids}")
 
-                    # ── Prescription ──
+                    # ── Prescription — TOUJOURS affiché ──
                     st.divider()
                     st.markdown('<p class="section-title">Prescription</p>', unsafe_allow_html=True)
+
                     prescripteur = clean(row.get("PRESCRIPTEUR",""))
                     if prescripteur:
                         st.markdown(f"**👨‍⚕️ Prescripteur :** {prescripteur}")
-                    libelle = clean(row.get("LIBELLE_PRESCRIPTION",""))
-                    if libelle:
+
+                    libelle = str(row.get("LIBELLE_PRESCRIPTION","")).strip()
+                    if libelle and libelle.lower() not in ("nan","non spécifié","code inconnu",""):
                         with st.expander("📝 Libellé de prescription"):
                             st.write(libelle)
+
                     descripteurs = clean(row.get("DESCRIPEURS",""))
                     if descripteurs:
                         with st.expander("🏷️ Descripteurs"):
                             st.write(descripteurs)
 
                     # ── Fiche technique ──
-                    pdf = clean(row.get("FICHE_TECHNIQUE",""))
+                    pdf = str(row.get("FICHE_TECHNIQUE","")).strip()
                     if pdf and pdf.lower().startswith("http"):
                         st.link_button("📄 Fiche technique (PDF)", pdf)
                     else:
