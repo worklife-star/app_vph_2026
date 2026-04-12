@@ -230,7 +230,7 @@ with st.sidebar:
         st.markdown(f'''
         <a href="{url}" target="_blank" style="
             display:block; width:100%; box-sizing:border-box;
-            background:#1D4ED8; color:#FFFFFF !important;
+            background:#FFFFFF; color:#0B1F4B !important;
             border-radius:10px; padding:10px 14px;
             font-size:0.88rem; font-weight:600;
             text-decoration:none; margin-bottom:8px;
