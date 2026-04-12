@@ -216,7 +216,7 @@ df_raw = load_data()
 
 # ── SIDEBAR ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 📂 Documents")
+    st.markdown("## 📂 Démarche à savoir")
     st.markdown("Téléchargez les documents officiels.")
     st.divider()
     docs = [
@@ -226,7 +226,17 @@ with st.sidebar:
         ("👨‍⚕️ Qui peut prescrire ?",    "1ZRKYZhsRx_5SiUNOAMhoRC8EtesPx9ja"),
     ]
     for label, fid in docs:
-        st.link_button(label, f"https://drive.google.com/uc?export=download&id={fid}", use_container_width=True)
+        url = f"https://drive.google.com/uc?export=download&id={fid}"
+        st.markdown(f'''
+        <a href="{url}" target="_blank" style="
+            display:block; width:100%; box-sizing:border-box;
+            background:#1D4ED8; color:#FFFFFF !important;
+            border-radius:10px; padding:10px 14px;
+            font-size:0.88rem; font-weight:600;
+            text-decoration:none; margin-bottom:8px;
+            box-shadow:0 2px 8px rgba(29,78,216,0.35);
+        ">{label}</a>
+        ''', unsafe_allow_html=True)
     st.divider()
     st.caption("🔄 Données actualisées toutes les 60 s")
 
