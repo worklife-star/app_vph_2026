@@ -15,28 +15,40 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 /* ── sidebar ── */
 [data-testid="stSidebar"] {
     background: #0B1F4B !important;
-    border-right: none !important;
+    border-right: 4px solid #2563EB !important;
 }
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] .stMarkdown { color: #CBD5E1 !important; }
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 { color: #FFFFFF !important; font-family: 'Sora', sans-serif !important; }
-[data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.12) !important; margin: 12px 0 !important; }
-[data-testid="stSidebar"] .stCaption p { color: rgba(255,255,255,0.35) !important; font-size:0.72rem !important; }
+[data-testid="stSidebar"] .stMarkdown p { color: #E2E8F0 !important; font-size: 0.9rem !important; }
+[data-testid="stSidebar"] h2 {
+    color: #FFFFFF !important;
+    font-family: 'Sora', sans-serif !important;
+    font-size: 1.15rem !important;
+    letter-spacing: -0.3px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #2563EB;
+    margin-bottom: 8px !important;
+}
+[data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.2) !important; margin: 14px 0 !important; }
+[data-testid="stSidebar"] .stCaption p { color: rgba(255,255,255,0.45) !important; font-size:0.72rem !important; }
 [data-testid="stSidebar"] .stLinkButton a {
-    background: rgba(255,255,255,0.08) !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
+    background: #1D4ED8 !important;
+    border: none !important;
     color: #FFFFFF !important;
     border-radius: 10px !important;
     font-size: 0.88rem !important;
-    font-weight: 500 !important;
-    transition: background 0.18s, transform 0.18s !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+    box-shadow: 0 2px 8px rgba(29,78,216,0.35) !important;
+    transition: background 0.18s, transform 0.18s, box-shadow 0.18s !important;
+    display: block !important;
+    text-align: left !important;
 }
 [data-testid="stSidebar"] .stLinkButton a:hover {
-    background: rgba(255,255,255,0.16) !important;
-    transform: translateX(4px) !important;
+    background: #2563EB !important;
+    transform: translateX(5px) !important;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.5) !important;
 }
 
 /* ── titres ── */
