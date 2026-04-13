@@ -224,6 +224,7 @@ with st.sidebar:
         ("📝 Évaluation des besoins",  "1OXc5N-rPpOAzI3r1F8Ov887mn_k75qoD"),
         ("🪑 VPH par catégorie",        "1_vMX4OU5tqm5OU_YtNyUel2SatFQ_VyJ"),
         ("👨‍⚕️ Qui peut prescrire ?",    "1ZRKYZhsRx_5SiUNOAMhoRC8EtesPx9ja"),
+        ("🗺️ Parcours",                        "1TXF4AiB_U9cwE1_56HoVrsCIE-RGZKLo"),
     ]
     for label, fid in docs:
         url = f"https://drive.google.com/uc?export=download&id={fid}"
