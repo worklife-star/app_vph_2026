@@ -242,6 +242,22 @@ with st.sidebar:
     st.caption("🔄 Données actualisées toutes les 60 s")
 
 # ── MAIN ─────────────────────────────────────────────────────────────────────
+st.markdown('''
+<div style="
+    display:inline-block;
+    background:#EFF6FF;
+    color:#1D4ED8;
+    border:2px solid #BFDBFE;
+    border-radius:10px;
+    padding:8px 16px;
+    font-size:0.88rem;
+    font-weight:600;
+    margin-bottom:12px;
+    box-shadow:0 1px 4px rgba(29,78,216,0.1);
+">
+    ← Démarche à savoir — cliquez sur la flèche en haut à gauche
+</div>
+''', unsafe_allow_html=True)
 st.title("🦽 Assistant Réforme VPH 2026")
 st.markdown('<p class="subtitle">Consultez les fauteuils roulants, codes LPPR et conditions de prescription de la nomenclature 2026.</p>', unsafe_allow_html=True)
 
@@ -383,3 +399,4 @@ else:
                         st.link_button("📄 Fiche technique (PDF)", pdf)
                     else:
                         st.caption("⚠️ Aucune fiche technique disponible")
+                    
